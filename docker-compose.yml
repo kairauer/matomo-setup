@@ -1,0 +1,37 @@
+version: "3"
+
+services:
+  db:
+    image: mariadb
+    container_name: matomo_db
+    command: --max-allowed-packet=64MB
+    restart: always
+    volumes:
+      - ./db_data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=YOUR_ROOT_PW
+    env_file:
+      - ./db.env
+
+  app:
+    build: .
+    container_name: matomo_app
+    restart: always
+    links:
+      - db
+    environment:
+      - MATOMO_DATABASE_HOST=db
+      - VIRTUAL_HOST=yoursub.domain.com
+      - LETSENCRYPT_HOST=yoursub.domain.com
+      - LETSENCRYPT_EMAIL=your@email.com
+    env_file:
+      - ./db.env
+
+volumes:
+  db:
+  matomo:
+
+networks:
+  default:
+    external:
+      name: webproxy
